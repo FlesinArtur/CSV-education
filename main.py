@@ -1,8 +1,10 @@
 import csv
 import requests
 from bs4 import BeautifulSoup
+import os.path
 
 website = "https://anitube.in.ua/?do=random_anime"
+fieldnames = ["title", "url", "information", "description"]
 
 
 def get_anime_html():
@@ -32,17 +34,31 @@ def write_anime_info(info):
     print(f'Посилання:\n{info["url"]}')
     print(f'Інформація:\n{info["information"]}')
     print(f'Опис:\n{info["description"]}')
-    fieldnames = ["title", "url", "information", "description"]
     with open("anime_data.csv", 'w', encoding='utf-8', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(["title", "url", "information", "description"])
         writer.writerow([info["title"], info["url"], info["information"], info["description"]])
 
 
+def add_anime_info(info):
+    with open("anime_data.csv", 'a', encoding='utf-8', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writerow({
+            'title': info['title'],
+            'url': info['url'],
+            'information': info['information'],
+            'description': info['description']
+        })
+
+
 def main():
     html = get_anime_html()
-    anime = get_anime_info(html)
-    write_anime_info(anime)
+    info = get_anime_info(html)
+
+    if os.path.isfile("anime_data.csv"):
+        add_anime_info(info)
+    else:
+        write_anime_info(info)
 
 
 if __name__ == '__main__':
